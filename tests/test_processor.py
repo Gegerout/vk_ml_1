@@ -1,6 +1,6 @@
 import unittest
-from TDocument import TDocument
-from processor import DocumentProcessor
+from src.TDocument import TDocument
+from src.processor import DocumentProcessor
 
 
 class TestDocumentProcessor(unittest.TestCase):

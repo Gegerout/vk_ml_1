@@ -1,6 +1,8 @@
 from kafka import KafkaConsumer, KafkaProducer
 from TDocument import TDocument
 from processor import DocumentProcessor
+from database import Database
+import os
 
 
 def consume_and_process():
@@ -14,13 +16,16 @@ def consume_and_process():
 
     producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
-    processor = DocumentProcessor()
+    # Указываем путь к базе данных в папке data
+    db_path = os.path.join('..', 'data', 'documents.db')
+    db = Database(db_path)
+    processor = DocumentProcessor(db)
 
     for message in consumer:
         message_value = message.value.decode('utf-8')
         doc = TDocument.from_json(message_value)
         if doc is None:
-            continue  # Skip invalid messages
+            continue  # Пропускаем неверные сообщения
 
         processed_doc = processor.process(doc)
         if processed_doc:
@@ -28,6 +33,7 @@ def consume_and_process():
 
     consumer.close()
     producer.close()
+    db.close()
 
 
 if __name__ == "__main__":

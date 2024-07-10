@@ -1,5 +1,6 @@
 import json
 
+
 class TDocument:
     def __init__(self, Url, PubDate, FetchTime, Text, FirstFetchTime=None):
         self.Url = Url
