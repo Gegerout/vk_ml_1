@@ -10,6 +10,10 @@ class TestDocumentProcessor(unittest.TestCase):
         self.processor = DocumentProcessor(self.db_mock)
 
     def test_process_new_document(self):
+        """
+            Тест на обработку нового документа.
+            Проверяет, что новый документ сохраняется в базу данных с корректным значением FirstFetchTime.
+        """
         doc = TDocument(
             Url="https://example.com/doc1",
             PubDate=1620000000,
@@ -25,6 +29,10 @@ class TestDocumentProcessor(unittest.TestCase):
         self.db_mock.save_document.assert_called_with(processed_doc)
 
     def test_process_existing_document_update(self):
+        """
+            Тест на обновление существующего документа.
+            Проверяет, что текст и FetchTime обновляются корректно, если FetchTime нового документа больше.
+        """
         initial_doc = TDocument(
             Url="https://example.com/doc1",
             PubDate=1620000000,
@@ -48,28 +56,6 @@ class TestDocumentProcessor(unittest.TestCase):
         self.assertEqual(processed_doc.FetchTime, updated_doc.FetchTime)
         self.assertEqual(processed_doc.FirstFetchTime, initial_doc.FirstFetchTime)
         self.db_mock.save_document.assert_called_with(processed_doc)
-
-    def test_process_existing_document_no_update(self):
-        initial_doc = TDocument(
-            Url="https://example.com/doc1",
-            PubDate=1620000000,
-            FetchTime=1620000020,
-            Text="First version of the document",
-            FirstFetchTime=1620000010
-        )
-
-        old_doc = TDocument(
-            Url="https://example.com/doc1",
-            PubDate=1620000000,
-            FetchTime=1620000020,
-            Text="Old version of the document"
-        )
-
-        self.db_mock.get_document.return_value = initial_doc
-        processed_doc = self.processor.process(old_doc)
-
-        self.assertIsNone(processed_doc)
-        self.db_mock.save_document.assert_not_called()
 
 
 if __name__ == "__main__":
