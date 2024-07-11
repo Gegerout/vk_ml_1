@@ -58,4 +58,4 @@ class Database:
         return None
 
     def close(self):
-        pass  # SQLAlchemy handles connections automatically
+        pass

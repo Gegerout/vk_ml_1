@@ -16,7 +16,6 @@ def consume_and_process():
 
     producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
-    # Указываем путь к базе данных в папке data
     db_path = os.path.join('..', 'data', 'documents.db')
     db = Database(db_path)
     processor = DocumentProcessor(db)
@@ -25,7 +24,7 @@ def consume_and_process():
         message_value = message.value.decode('utf-8')
         doc = TDocument.from_json(message_value)
         if doc is None:
-            continue  # Пропускаем неверные сообщения
+            continue
 
         processed_doc = processor.process(doc)
         if processed_doc:

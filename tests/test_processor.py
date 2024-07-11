@@ -11,7 +11,7 @@ class TestDocumentProcessor(unittest.TestCase):
 
     def test_process_new_document(self):
         doc = TDocument(
-            Url="http://example.com/doc1",
+            Url="https://example.com/doc1",
             PubDate=1620000000,
             FetchTime=1620000010,
             Text="First version of the document"
@@ -26,7 +26,7 @@ class TestDocumentProcessor(unittest.TestCase):
 
     def test_process_existing_document_update(self):
         initial_doc = TDocument(
-            Url="http://example.com/doc1",
+            Url="https://example.com/doc1",
             PubDate=1620000000,
             FetchTime=1620000010,
             Text="First version of the document",
@@ -34,7 +34,7 @@ class TestDocumentProcessor(unittest.TestCase):
         )
 
         updated_doc = TDocument(
-            Url="http://example.com/doc1",
+            Url="https://example.com/doc1",
             PubDate=1620000000,
             FetchTime=1620000020,
             Text="Updated version of the document"
@@ -51,7 +51,7 @@ class TestDocumentProcessor(unittest.TestCase):
 
     def test_process_existing_document_no_update(self):
         initial_doc = TDocument(
-            Url="http://example.com/doc1",
+            Url="https://example.com/doc1",
             PubDate=1620000000,
             FetchTime=1620000020,
             Text="First version of the document",
@@ -59,7 +59,7 @@ class TestDocumentProcessor(unittest.TestCase):
         )
 
         old_doc = TDocument(
-            Url="http://example.com/doc1",
+            Url="https://example.com/doc1",
             PubDate=1620000000,
             FetchTime=1620000020,
             Text="Old version of the document"
