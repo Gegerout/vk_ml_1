@@ -1,91 +1,75 @@
 import unittest
 from src.TDocument import TDocument
 from src.processor import DocumentProcessor
+from unittest.mock import MagicMock
 
 
 class TestDocumentProcessor(unittest.TestCase):
-    def test_processing(self):
-        processor = DocumentProcessor()
+    def setUp(self):
+        self.db_mock = MagicMock()
+        self.processor = DocumentProcessor(self.db_mock)
 
-        # Test input documents
-        doc1 = TDocument("http://example.com", 1622470420, 1, "Text1")
-        doc2 = TDocument("http://example.com", 1622470420, 2, "Text2")
-        doc3 = TDocument("http://example.com", 1622470420, 3, "Text3")
+    def test_process_new_document(self):
+        doc = TDocument(
+            Url="http://example.com/doc1",
+            PubDate=1620000000,
+            FetchTime=1620000010,
+            Text="First version of the document"
+        )
 
-        # Process the documents
-        result1 = processor.process(doc1)
-        result2 = processor.process(doc2)
-        result3 = processor.process(doc3)
+        self.db_mock.get_document.return_value = None
+        processed_doc = self.processor.process(doc)
 
-        # Check the results
-        self.assertEqual(result1.Text, "Text1")
-        self.assertEqual(result1.FetchTime, 1)
-        self.assertEqual(result1.PubDate, 1622470420)
-        self.assertEqual(result1.FirstFetchTime, 1)
+        self.assertIsNotNone(processed_doc)
+        self.assertEqual(processed_doc.FirstFetchTime, doc.FetchTime)
+        self.db_mock.save_document.assert_called_with(processed_doc)
 
-        self.assertEqual(result2.Text, "Text2")
-        self.assertEqual(result2.FetchTime, 2)
-        self.assertEqual(result2.PubDate, 1622470420)
-        self.assertEqual(result2.FirstFetchTime, 1)
+    def test_process_existing_document_update(self):
+        initial_doc = TDocument(
+            Url="http://example.com/doc1",
+            PubDate=1620000000,
+            FetchTime=1620000010,
+            Text="First version of the document",
+            FirstFetchTime=1620000010
+        )
 
-        self.assertEqual(result3.Text, "Text3")
-        self.assertEqual(result3.FetchTime, 3)
-        self.assertEqual(result3.PubDate, 1622470420)
-        self.assertEqual(result3.FirstFetchTime, 1)
+        updated_doc = TDocument(
+            Url="http://example.com/doc1",
+            PubDate=1620000000,
+            FetchTime=1620000020,
+            Text="Updated version of the document"
+        )
 
-    def test_mixed_order(self):
-        processor = DocumentProcessor()
+        self.db_mock.get_document.return_value = initial_doc
+        processed_doc = self.processor.process(updated_doc)
 
-        # Documents received out of order
-        doc1 = TDocument("http://example.com", 1622470420, 3, "Text3")
-        doc2 = TDocument("http://example.com", 1622470420, 1, "Text1")
-        doc3 = TDocument("http://example.com", 1622470420, 2, "Text2")
+        self.assertIsNotNone(processed_doc)
+        self.assertEqual(processed_doc.Text, updated_doc.Text)
+        self.assertEqual(processed_doc.FetchTime, updated_doc.FetchTime)
+        self.assertEqual(processed_doc.FirstFetchTime, initial_doc.FirstFetchTime)
+        self.db_mock.save_document.assert_called_with(processed_doc)
 
-        result1 = processor.process(doc1)
-        result2 = processor.process(doc2)
-        result3 = processor.process(doc3)
+    def test_process_existing_document_no_update(self):
+        initial_doc = TDocument(
+            Url="http://example.com/doc1",
+            PubDate=1620000000,
+            FetchTime=1620000020,
+            Text="First version of the document",
+            FirstFetchTime=1620000010
+        )
 
-        self.assertEqual(result1.Text, "Text3")
-        self.assertEqual(result1.FetchTime, 3)
-        self.assertEqual(result1.PubDate, 1622470420)
-        self.assertEqual(result1.FirstFetchTime, 3)
+        old_doc = TDocument(
+            Url="http://example.com/doc1",
+            PubDate=1620000000,
+            FetchTime=1620000020,
+            Text="Old version of the document"
+        )
 
-        self.assertEqual(result2.Text, "Text3")
-        self.assertEqual(result2.FetchTime, 3)
-        self.assertEqual(result2.PubDate, 1622470420)
-        self.assertEqual(result2.FirstFetchTime, 1)
+        self.db_mock.get_document.return_value = initial_doc
+        processed_doc = self.processor.process(old_doc)
 
-        self.assertEqual(result3.Text, "Text3")
-        self.assertEqual(result3.FetchTime, 3)
-        self.assertEqual(result3.PubDate, 1622470420)
-        self.assertEqual(result3.FirstFetchTime, 1)
-
-    def test_duplicates(self):
-        processor = DocumentProcessor()
-
-        # Duplicate documents
-        doc1 = TDocument("http://example.com", 1622470420, 1, "Text1")
-        doc2 = TDocument("http://example.com", 1622470420, 1, "Text1 Duplicate")
-        doc3 = TDocument("http://example.com", 1622470420, 2, "Text2")
-
-        result1 = processor.process(doc1)
-        result2 = processor.process(doc2)
-        result3 = processor.process(doc3)
-
-        self.assertEqual(result1.Text, "Text1")
-        self.assertEqual(result1.FetchTime, 1)
-        self.assertEqual(result1.PubDate, 1622470420)
-        self.assertEqual(result1.FirstFetchTime, 1)
-
-        self.assertEqual(result2.Text, "Text1")
-        self.assertEqual(result2.FetchTime, 1)
-        self.assertEqual(result2.PubDate, 1622470420)
-        self.assertEqual(result2.FirstFetchTime, 1)
-
-        self.assertEqual(result3.Text, "Text2")
-        self.assertEqual(result3.FetchTime, 2)
-        self.assertEqual(result3.PubDate, 1622470420)
-        self.assertEqual(result3.FirstFetchTime, 1)
+        self.assertIsNone(processed_doc)
+        self.db_mock.save_document.assert_not_called()
 
 
 if __name__ == "__main__":

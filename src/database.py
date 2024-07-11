@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, String, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
-from TDocument import TDocument
+from src.TDocument import TDocument
 
 Base = declarative_base()
 

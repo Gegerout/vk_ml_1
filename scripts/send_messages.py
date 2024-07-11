@@ -6,9 +6,7 @@ def send_messages():
     producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
     messages = [
-        {"Url": "https://example.com", "PubDate": 1622470423, "FetchTime": 3, "Text": "Text3"},
-        {"Url": "https://example.com", "PubDate": 1622470421, "FetchTime": 1, "Text": "Text1"},
-        {"Url": "https://example.com", "PubDate": 1622470422, "FetchTime": 2, "Text": "Text2"}
+        {"Url": "https://example3.com", "PubDate": 1622470423, "FetchTime": 1, "Text": "Text3"},
     ]
 
     for msg in messages:

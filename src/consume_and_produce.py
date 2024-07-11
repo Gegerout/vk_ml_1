@@ -1,7 +1,7 @@
 from kafka import KafkaConsumer, KafkaProducer
-from TDocument import TDocument
-from processor import DocumentProcessor
-from database import Database
+from src.TDocument import TDocument
+from src.processor import DocumentProcessor
+from src.database import Database
 import os
 
 
